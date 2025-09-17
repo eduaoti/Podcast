@@ -1,11 +1,14 @@
 // src/components/Podcast.jsx
 import { useEffect, useMemo, useRef, useState } from "react";
 
+/* ===== Helper para rutas (funciona en / y en /Podcast/) ===== */
+const ASSET = (p) => `${import.meta.env.BASE_URL}${p.startsWith("/") ? p.slice(1) : p}`;
+
 /* ========= Catálogo por voces ========= */
 const data = [
   {
     title: "Voz 1 – Edu",
-    folder: "/podcasts/V1",
+    folder: "podcasts/V1",
     tracks: [
       { file: "EduV1.mp3", label: "Sección 1 – Intro" },
       { file: "EduV2.mp3", label: "Sección 2 – Patrones (MVC)" },
@@ -17,7 +20,7 @@ const data = [
   },
   {
     title: "Voz 2 – Cris",
-    folder: "/podcasts/V2",
+    folder: "podcasts/V2",
     tracks: [
       { file: "CrisV1.mp3", label: "Sección 1 – Características" },
       { file: "CrisV2.mp3", label: "Sección 2 – MVC" },
@@ -26,12 +29,12 @@ const data = [
       { file: "CrisV5.mp3", label: "Sección 3 – Nube (ejemplos)" },
       { file: "CrisV6.mp3", label: "Sección 4 – Offline/Sync (prácticas)" },
       { file: "CrisV7.mp3", label: "Sección 5 – Microservicios" },
-      { file: "CrisV8.mp3", label: "Cierre/Créditos" }, // fuera del alcance del playlist
+      { file: "CrisV8.mp3", label: "Cierre/Créditos" },
     ],
   },
   {
     title: "Voz 3 – Schos",
-    folder: "/podcasts/V3",
+    folder: "podcasts/V3",
     tracks: [
       { file: "SchosV1.mp3", label: "Sección 1 – Importancia" },
       { file: "SchosV2.mp3", label: "Sección 2 – Patrones / Clean Architecture" },
@@ -47,25 +50,25 @@ const data = [
 /* ========= Orden del guion (hasta Sección 5) ========= */
 const playlist = [
   // Sección 1
-  { label: "Intro – Arquitectura móvil (Edu)", url: "/podcasts/V1/EduV1.mp3" },
-  { label: "Características (Cris)", url: "/podcasts/V2/CrisV1.mp3" },
-  { label: "Importancia (Schos)", url: "/podcasts/V3/SchosV1.mp3" },
+  { label: "Intro – Arquitectura móvil (Edu)",  url: ASSET("podcasts/V1/EduV1.mp3") },
+  { label: "Características (Cris)",             url: ASSET("podcasts/V2/CrisV1.mp3") },
+  { label: "Importancia (Schos)",               url: ASSET("podcasts/V3/SchosV1.mp3") },
   // Sección 2 – Patrones
-  { label: "Patrones – MVC (Edu)", url: "/podcasts/V1/EduV2.mp3" },
-  { label: "Patrones – MVP (Cris)", url: "/podcasts/V2/CrisV3.mp3" },
-  { label: "Patrones – MVVM (Edu)", url: "/podcasts/V1/EduV4.mp3" },
-  { label: "Clean Architecture (Schos)", url: "/podcasts/V3/SchosV2.mp3" },
+  { label: "Patrones – MVC (Edu)",              url: ASSET("podcasts/V1/EduV2.mp3") },
+  { label: "Patrones – MVP (Cris)",             url: ASSET("podcasts/V2/CrisV3.mp3") },
+  { label: "Patrones – MVVM (Edu)",             url: ASSET("podcasts/V1/EduV4.mp3") },
+  { label: "Clean Architecture (Schos)",        url: ASSET("podcasts/V3/SchosV2.mp3") },
   // Sección 3 – Nube
-  { label: "La nube en apps (Edu)", url: "/podcasts/V1/EduV5.mp3" },
-  { label: "Nube – ejemplos (Cris)", url: "/podcasts/V2/CrisV5.mp3" },
-  { label: "Nube – retos (Schos)", url: "/podcasts/V3/SchosV3.mp3" },
+  { label: "La nube en apps (Edu)",             url: ASSET("podcasts/V1/EduV5.mp3") },
+  { label: "Nube – ejemplos (Cris)",            url: ASSET("podcasts/V2/CrisV5.mp3") },
+  { label: "Nube – retos (Schos)",              url: ASSET("podcasts/V3/SchosV3.mp3") },
   // Sección 4 – Offline/Sync
-  { label: "Offline & sincronización (Edu)", url: "/podcasts/V1/EduV6.mp3" },
-  { label: "Offline – prácticas (Cris)", url: "/podcasts/V2/CrisV6.mp3" },
-  { label: "Offline – complementos (Schos)", url: "/podcasts/V3/SchosV4.mp3" },
+  { label: "Offline & sincronización (Edu)",    url: ASSET("podcasts/V1/EduV6.mp3") },
+  { label: "Offline – prácticas (Cris)",        url: ASSET("podcasts/V2/CrisV6.mp3") },
+  { label: "Offline – complementos (Schos)",    url: ASSET("podcasts/V3/SchosV4.mp3") },
   // Sección 5 – Microservicios
-  { label: "Microservicios (Cris)", url: "/podcasts/V2/CrisV7.mp3" },
-  { label: "Microservicios – ejemplos (Schos)", url: "/podcasts/V3/SchosV5.mp3" },
+  { label: "Microservicios (Cris)",             url: ASSET("podcasts/V2/CrisV7.mp3") },
+  { label: "Microservicios – ejemplos (Schos)", url: ASSET("podcasts/V3/SchosV5.mp3") },
 ];
 
 export default function Podcast() {
@@ -101,15 +104,12 @@ export default function Podcast() {
     return () => clearTimeout(t);
   }, [current?.url, autoPlay]);
 
-  const handleEnded = () => setIndex((i) => (i === null ? null : Math.min(i + 1, playlist.length - 1)));
-  const handleError = () => { console.warn("No se pudo cargar el audio, saltando:", current?.url); handleEnded(); };
+  const handleEnded   = () => setIndex((i) => (i === null ? null : Math.min(i + 1, playlist.length - 1)));
+  const handleError   = () => { console.warn("No se pudo cargar el audio, saltando:", current?.url); handleEnded(); };
 
   return (
     <div className="site">
-      {/* blobs */}
-      <div className="blobs"><div className="blob blob-a"/><div className="blob blob-b"/></div>
-
-      {/* NAV */}
+      {/* ===== NAV ===== */}
       <header className="nav">
         <div className="nav__brand"><span className="logo">🎧</span><span className="brand">Arquitectura Móvil</span></div>
         <nav className="nav__links">
@@ -121,7 +121,7 @@ export default function Podcast() {
         <button className="btn btn--ghost" onClick={() => setDark((v) => !v)}>{dark ? "☀️ Light" : "🌙 Dark"}</button>
       </header>
 
-      {/* HERO */}
+      {/* ===== HERO ===== */}
       <section className="hero" id="home">
         <div className="hero__text">
           <h1>Arquitectura de <span className="grad">Apps Móviles</span></h1>
@@ -134,7 +134,7 @@ export default function Podcast() {
         </div>
 
         <div className="hero__card card">
-          <div className="card__header"><div className="pill">Podcast</div><div className="card__title">Arquitectura móvil — hasta Sección 5</div></div>
+          <div className="card__header"><div className="pill">PODCAST</div><div className="card__title">Arquitectura móvil — hasta Sección 5</div></div>
           <div className="player">
             <div className="player__title">
               {current ? `${String(index + 1).padStart(2, "0")}/${playlist.length} · ${current.label}` : "Selecciona una pista más abajo o presiona Play."}
@@ -152,7 +152,7 @@ export default function Podcast() {
         </div>
       </section>
 
-      {/* PODCAST PRINCIPAL + LISTAS */}
+      {/* ===== PODCAST ===== */}
       <section id="podcast" className="section">
         <div className="container">
           <h2 className="h2">Podcast – Arquitectura de Aplicaciones Móviles (hasta Sección 5)</h2>
@@ -177,17 +177,18 @@ export default function Podcast() {
 
           <div className="grid">
             {data.map((voice) => {
-              const urlIndexMap = urlIndex;
               return (
                 <section key={voice.title} className="card">
                   <h3 className="h3">{voice.title}</h3>
                   <ul className="list">
                     {voice.tracks.map((t, i) => {
-                      const url = `${voice.folder}/${t.file}`;
-                      const inPlaylist = urlIndexMap.has(url);
+                      const url = ASSET(`${voice.folder}/${t.file}`);
+                      const inPlaylist = urlIndex.has(url);
                       return (
                         <li key={url} className={`item ${inPlaylist ? "" : "item--muted"}`}>
-                          <span className="item__label">{String(i + 1).padStart(2, "0")} · {t.label}{!inPlaylist && " (fuera del guion)"}</span>
+                          <span className="item__label">
+                            {String(i + 1).padStart(2, "0")} · {t.label}{!inPlaylist && " (fuera del guion)"}
+                          </span>
                           <div className="item__actions">
                             <button className="btn" onClick={() => playUrl(url)} disabled={!inPlaylist}>▶︎ Reproducir</button>
                             <a className="btn" href={url} download>⤓ Descargar</a>
@@ -203,7 +204,7 @@ export default function Podcast() {
         </div>
       </section>
 
-      {/* ======= RESUMEN ======= */}
+      {/* ===== RESUMEN ===== */}
       <section id="resumen" className="section">
         <div className="container">
           <div className="grid">
@@ -235,7 +236,7 @@ export default function Podcast() {
         </div>
       </section>
 
-      {/* ======= DIAGRAMAS ======= */}
+      {/* ===== DIAGRAMAS ===== */}
       <section id="diagramas" className="section">
         <div className="container">
           <h2 className="h2">Diagramas de arquitectura</h2>
@@ -317,21 +318,20 @@ export default function Podcast() {
         </div>
       </section>
 
-      {/* ======= GALERÍA ======= */}
+      {/* ===== GALERÍA ===== */}
       <section id="galeria" className="section">
         <div className="container">
           <h2 className="h2">Galería de imágenes IA</h2>
-          <p className="muted" style={{marginBottom: 12}}>Coloca tus imágenes en <code>public/img/</code> y ajusta las rutas si quieres.</p>
+        <p className="muted" style={{marginBottom: 12}}>Coloca tus imágenes en <code>public/img/</code> y ajusta las rutas si quieres.</p>
           <div className="grid">
-            <figure className="card"><img src="/img/arquitectura-1.png" alt="Diagrama arquitectura móvil" /></figure>
-            <figure className="card"><img src="/img/arquitectura-2.png" alt="Microservicios" /></figure>
-            <figure className="card"><img src="/img/arquitectura-3.png" alt="Offline-first" /></figure>
-            {/* agrega más <figure className="card"><img .../></figure> si quieres */}
+            <figure className="card"><img src={ASSET("img/arquitectura-1.jpg")} alt="Diagrama arquitectura móvil" /></figure>
+            <figure className="card"><img src={ASSET("img/arquitectura-2.jpg")} alt="Microservicios" /></figure>
+            <figure className="card"><img src={ASSET("img/arquitectura-3.jpg")} alt="Offline-first" /></figure>
           </div>
         </div>
       </section>
 
-      {/* FOOTER */}
+      {/* ===== FOOTER ===== */}
       <footer className="section" style={{paddingTop: 16}}>
         <div className="container" style={{display:"flex",gap:12,justifyContent:"space-between",alignItems:"center",borderTop:"1px solid var(--border)",paddingTop:12}}>
           <p className="muted">© 2025 · Arquitectura de Apps Móviles</p>
